@@ -1,3 +1,4 @@
+// App.tsx
 import React, { useState, useEffect } from "react";
 import TaskForm from "./components/TaskForm";
 import ChatContainer from "./components/ChatContainer";
@@ -14,6 +15,8 @@ function App() {
     if (socket) {
       socket.onmessage = (event) => {
         const data = JSON.parse(event.data) as StateUpdate;
+        console.log('Received WebSocket data:', data); // 웹소켓으로 받은 데이터 로깅
+        
         const newMessage: Message = {
           agent: data.agent,
           phase: data.phase,
@@ -22,7 +25,14 @@ function App() {
           nextAgent: data.next_agent,
           timestamp: new Date().toISOString()
         };
-        setMessages(prev => [...prev, newMessage]);
+        
+        console.log('Created new message:', newMessage); // 생성된 메시지 객체 로깅
+        
+        setMessages(prev => {
+          const updatedMessages = [...prev, newMessage];
+          console.log('Updated messages state:', updatedMessages); // 상태 업데이트 로깅
+          return updatedMessages;
+        });
       };
     }
   }, [socket]);
