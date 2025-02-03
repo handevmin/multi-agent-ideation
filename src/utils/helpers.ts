@@ -1,14 +1,14 @@
 ﻿export const getAgentDisplayName = (agent: string): string => {
   const names: { [key: string]: string } = {
-    "supervisor": "관리자",
-    "fact_analyzer": "데이터 분석가",
-    "emotional": "감성 분석가",
-    "critical": "비판적 분석가",
-    "positive": "긍정 분석가",
-    "creative": "창의적 분석가",
+    "facilitator": "진행자",
+    "white_hat": "White Hat (객관적 데이터 분석)",
+    "red_hat": "Red Hat (감정/직관적 분석)",
+    "black_hat": "Black Hat (비판적 분석)",
+    "yellow_hat": "Yellow Hat (긍정적 분석)",
+    "green_hat": "Green Hat (창의적 분석)",
     "system": "시스템"
   };
-  return names[agent] || agent;
+  return names[agent.toLowerCase()] || agent;
 };
 
 export const getPhaseDisplayName = (phase: string): string => {
