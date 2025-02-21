@@ -13,7 +13,7 @@ export const useWebSocket = () => {
         }
         setSessionId(newSessionId);
 
-        const ws = new WebSocket(`wss://your-backend-url/ws/${newSessionId}`);
+        const ws = new WebSocket(`wss://multi-agent-ideation-47d7ed810e04.herokuapp.com/ws/${newSessionId}`);
 
         ws.onopen = () => {
             setIsConnected(true);
