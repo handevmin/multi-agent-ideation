@@ -1,8 +1,18 @@
-﻿import React, { FormEvent, useState } from "react";
+﻿
+import React, { FormEvent, useState } from "react";
 import { Task, TaskFormProps } from "../types";
 import { startIdeation } from "../services/api";
 
-const TaskForm: React.FC<TaskFormProps> = ({ isLoading, setIsLoading, setMessages }) => {
+interface ExtendedTaskFormProps extends TaskFormProps {
+  sessionId: string;
+}
+
+const TaskForm: React.FC<ExtendedTaskFormProps> = ({ 
+  isLoading, 
+  setIsLoading, 
+  setMessages, 
+  sessionId 
+}) => {
   const [formData, setFormData] = useState<Task>({
     goal: "아이디어 5개 도출 및 우선순위화된 상위 3개 아이디어 선정",
     target_users: "20~30대, 모바일 중심으로 콘텐츠를 소비하는 사용자",
@@ -15,7 +25,7 @@ const TaskForm: React.FC<TaskFormProps> = ({ isLoading, setIsLoading, setMessage
     setMessages([]);
     setIsLoading(true);
     try {
-      await startIdeation(formData);
+      await startIdeation(formData, sessionId);
     } catch (error) {
       console.error('Error:', error);
       setMessages(prev => [...prev, {

@@ -3,13 +3,21 @@ import { useState, useEffect } from 'react';
 export const useWebSocket = () => {
     const [socket, setSocket] = useState<WebSocket | null>(null);
     const [isConnected, setIsConnected] = useState(false);
+    const [sessionId, setSessionId] = useState<string>('');
 
     useEffect(() => {
-        const ws = new WebSocket('wss://multi-agent-ideation-47d7ed810e04.herokuapp.com/ws');
+        const existingSessionId = localStorage.getItem('sessionId');
+        const newSessionId = existingSessionId || crypto.randomUUID();
+        if (!existingSessionId) {
+            localStorage.setItem('sessionId', newSessionId);
+        }
+        setSessionId(newSessionId);
+
+        const ws = new WebSocket(`wss://your-backend-url/ws/${newSessionId}`);
 
         ws.onopen = () => {
             setIsConnected(true);
-            console.log('WebSocket Connected');
+            console.log('WebSocket Connected with session:', newSessionId);
         };
 
         ws.onclose = () => {
@@ -24,5 +32,5 @@ export const useWebSocket = () => {
         };
     }, []);
 
-    return { socket, isConnected };
+    return { socket, isConnected, sessionId };
 };
