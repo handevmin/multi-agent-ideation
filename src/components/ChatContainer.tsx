@@ -10,9 +10,19 @@ const ChatContainer: React.FC<ChatContainerProps> = ({ messages }) => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  // 마크다운에서 plaintext 형식 블록 제거
-  const cleanMessage = (message: string) => {
-    return message.replace(/```plaintext\s*/g, '').replace(/```\s*$/g, '');
+  const formatMessage = (message: string) => {
+    let formattedMessage = message.replace(/```.*?\n/g, '')
+                                .replace(/```$/g, '')
+                                .replace(/`([^`]+)`/g, '$1');
+    
+    formattedMessage = formattedMessage.replace(/<\/?code>/g, '');
+    
+    formattedMessage = formattedMessage.replace(
+      /\*\*([\w\s]+\([^)]*\))\*\*/g, 
+      '### $1'
+    );
+
+    return formattedMessage;
   };
 
   return (
@@ -29,7 +39,7 @@ const ChatContainer: React.FC<ChatContainerProps> = ({ messages }) => {
           </div>
           <div className="message-content">
             <ReactMarkdown>
-              {cleanMessage(message.message)}
+              {formatMessage(message.message)}
             </ReactMarkdown>
           </div>
           {message.progress !== null && message.progress !== undefined && (
