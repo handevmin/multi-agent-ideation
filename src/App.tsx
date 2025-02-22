@@ -12,22 +12,25 @@ function App() {
 
   useEffect(() => {
     if (socket) {
-      socket.onmessage = (event) => {
-        const data = JSON.parse(event.data) as StateUpdate;
-        
-        const newMessage: Message = {
-          agent: data.agent,
-          phase: data.phase,
-          message: data.message,
-          agentUsage: data.agent_usage,
-          nextAgent: data.next_agent,
-          timestamp: new Date().toISOString()
+        socket.onmessage = (event) => {
+            if (event.data === 'pong') return;
+
+            try {
+                const data = JSON.parse(event.data) as StateUpdate;
+                setMessages(prev => [...prev, {
+                    agent: data.agent,
+                    phase: data.phase,
+                    message: data.message,
+                    agentUsage: data.agent_usage,
+                    nextAgent: data.next_agent,
+                    timestamp: new Date().toISOString()
+                }]);
+            } catch (error) {
+                console.error('Error processing WebSocket message:', error);
+            }
         };
-        
-        setMessages(prev => [...prev, newMessage]);
-      };
     }
-  }, [socket]);
+}, [socket]);
 
   return (
     <div className="container">

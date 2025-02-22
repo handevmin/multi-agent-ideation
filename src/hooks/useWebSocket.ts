@@ -9,7 +9,6 @@ export const useWebSocket = () => {
     const socketRef = useRef<WebSocket | null>(null);
 
     const connect = () => {
-        // 기존 연결이 있다면 닫기
         if (socketRef.current) {
             socketRef.current.close();
         }
@@ -36,7 +35,6 @@ export const useWebSocket = () => {
             setIsConnected(false);
             socketRef.current = null;
 
-            // 재연결 시도
             if (reconnectAttempts.current < maxReconnectAttempts) {
                 const timeout = Math.min(1000 * Math.pow(2, reconnectAttempts.current), 10000);
                 console.log(`Reconnecting in ${timeout}ms...`);
@@ -44,6 +42,21 @@ export const useWebSocket = () => {
                     reconnectAttempts.current += 1;
                     connect();
                 }, timeout);
+            }
+        };
+
+        ws.onmessage = (event) => {
+            // ping/pong 메시지는 무시
+            if (event.data === 'pong') {
+                return;
+            }
+            
+            try {
+                // 나머지 메시지는 JSON으로 파싱
+                const data = JSON.parse(event.data);
+                // 여기서 메시지 처리
+            } catch (error) {
+                console.error('Error parsing WebSocket message:', error);
             }
         };
 
