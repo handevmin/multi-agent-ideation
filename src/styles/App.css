@@ -140,7 +140,60 @@ button:disabled {
 }
 
 .message-content {
-  white-space: pre-wrap;
+  padding: 1rem;
+  line-height: 1.6;
+}
+
+
+.message-content h1,
+.message-content h2,
+.message-content h3,
+.message-content h4,
+.message-content h5,
+.message-content h6 {
+  margin-top: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.message-content p {
+  margin-bottom: 1rem;
+}
+
+.message-content ul,
+.message-content ol {
+  margin-left: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.message-content li {
+  margin-bottom: 0.5rem;
+}
+
+.message-content strong {
+  font-weight: 600;
+  color: #2c5282;
+}
+
+.message-content blockquote {
+  border-left: 4px solid #e2e8f0;
+  padding-left: 1rem;
+  margin: 1rem 0;
+  color: #4a5568;
+}
+
+.message-content code {
+  background-color: #f7fafc;
+  padding: 0.2rem 0.4rem;
+  border-radius: 0.25rem;
+  font-family: monospace;
+}
+
+.message-content pre {
+  background-color: #f7fafc;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  overflow-x: auto;
+  margin: 1rem 0;
 }
 
 .progress-container {

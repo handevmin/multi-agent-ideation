@@ -1,4 +1,5 @@
 ﻿import React, { useEffect, useRef } from "react";
+import ReactMarkdown from 'react-markdown';
 import { ChatContainerProps, Message } from "../types";
 import { getAgentDisplayName, getPhaseDisplayName } from "../utils/helpers";
 
@@ -8,6 +9,11 @@ const ChatContainer: React.FC<ChatContainerProps> = ({ messages }) => {
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
+
+  // 마크다운에서 plaintext 형식 블록 제거
+  const cleanMessage = (message: string) => {
+    return message.replace(/```plaintext\s*/g, '').replace(/```\s*$/g, '');
+  };
 
   return (
     <div className="chat-container">
@@ -21,7 +27,11 @@ const ChatContainer: React.FC<ChatContainerProps> = ({ messages }) => {
               {getPhaseDisplayName(message.phase)}
             </span>
           </div>
-          <div className="message-content">{message.message}</div>
+          <div className="message-content">
+            <ReactMarkdown>
+              {cleanMessage(message.message)}
+            </ReactMarkdown>
+          </div>
           {message.progress !== null && message.progress !== undefined && (
             <div className="progress-container">
               <div
