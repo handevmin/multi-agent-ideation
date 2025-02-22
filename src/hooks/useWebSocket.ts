@@ -1,33 +1,49 @@
-// src/hooks/useWebSocket.ts
-
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 export const useWebSocket = () => {
     const [socket, setSocket] = useState<WebSocket | null>(null);
     const [isConnected, setIsConnected] = useState(false);
     const [sessionId, setSessionId] = useState<string>('');
-    const [retryCount, setRetryCount] = useState(0);
-    const MAX_RETRIES = 5;
-    
-    const connectWebSocket = useCallback((id: string) => {
-        const ws = new WebSocket(`wss://multi-agent-ideation-47d7ed810e04.herokuapp.com/ws/${id}`);
-        
+    const reconnectAttempts = useRef(0);
+    const maxReconnectAttempts = 5;
+    const socketRef = useRef<WebSocket | null>(null);
+
+    const connect = () => {
+        // 기존 연결이 있다면 닫기
+        if (socketRef.current) {
+            socketRef.current.close();
+        }
+
+        const existingSessionId = localStorage.getItem('sessionId');
+        const newSessionId = existingSessionId || crypto.randomUUID();
+        if (!existingSessionId) {
+            localStorage.setItem('sessionId', newSessionId);
+        }
+        setSessionId(newSessionId);
+
+        const wsUrl = `wss://multi-agent-ideation-47d7ed810e04.herokuapp.com/ws/${newSessionId}`;
+        const ws = new WebSocket(wsUrl);
+
         ws.onopen = () => {
-            setIsConnected(true);
-            setRetryCount(0);
             console.log('WebSocket Connected');
+            setIsConnected(true);
+            reconnectAttempts.current = 0;
+            socketRef.current = ws;
         };
 
         ws.onclose = () => {
-            setIsConnected(false);
             console.log('WebSocket Disconnected');
-            
+            setIsConnected(false);
+            socketRef.current = null;
+
             // 재연결 시도
-            if (retryCount < MAX_RETRIES) {
+            if (reconnectAttempts.current < maxReconnectAttempts) {
+                const timeout = Math.min(1000 * Math.pow(2, reconnectAttempts.current), 10000);
+                console.log(`Reconnecting in ${timeout}ms...`);
                 setTimeout(() => {
-                    setRetryCount(prev => prev + 1);
-                    connectWebSocket(id);
-                }, 1000 * Math.pow(2, retryCount)); // 지수 백오프
+                    reconnectAttempts.current += 1;
+                    connect();
+                }, timeout);
             }
         };
 
@@ -36,37 +52,27 @@ export const useWebSocket = () => {
         };
 
         setSocket(ws);
-    }, [retryCount]);
+    };
 
     useEffect(() => {
-        // 세션 ID 생성 또는 복구
-        const existingSessionId = localStorage.getItem('sessionId');
-        const newSessionId = existingSessionId || crypto.randomUUID();
-        if (!existingSessionId) {
-            localStorage.setItem('sessionId', newSessionId);
-        }
-        setSessionId(newSessionId);
+        connect();
 
-        // WebSocket 연결
-        connectWebSocket(newSessionId);
-
-        // Cleanup
         return () => {
-            if (socket) {
-                socket.close();
+            if (socketRef.current) {
+                socketRef.current.close();
             }
         };
-    }, [connectWebSocket]);
+    }, []);
 
-    // 활성 상태 유지를 위한 ping
+    // Keep-alive mechanism
     useEffect(() => {
         if (!socket) return;
 
         const interval = setInterval(() => {
             if (socket.readyState === WebSocket.OPEN) {
-                socket.send('ping');
+                socket.send("ping");
             }
-        }, 30000); // 30초마다 ping
+        }, 30000);
 
         return () => clearInterval(interval);
     }, [socket]);
