@@ -1,5 +1,4 @@
 ﻿import React, { useEffect, useRef } from "react";
-import ReactMarkdown from 'react-markdown';
 import { ChatContainerProps, Message } from "../types";
 import { getAgentDisplayName, getPhaseDisplayName } from "../utils/helpers";
 
@@ -11,18 +10,13 @@ const ChatContainer: React.FC<ChatContainerProps> = ({ messages }) => {
   }, [messages]);
 
   const formatMessage = (message: string) => {
-    let formattedMessage = message.replace(/```.*?\n/g, '')
-                                .replace(/```$/g, '')
-                                .replace(/`([^`]+)`/g, '$1');
-    
-    formattedMessage = formattedMessage.replace(/<\/?code>/g, '');
-    
-    formattedMessage = formattedMessage.replace(
-      /\*\*([\w\s]+\([^)]*\))\*\*/g, 
-      '### $1'
-    );
-
-    return formattedMessage;
+    // 모든 마크다운 문법과 코드 블록 제거
+    return message
+      .replace(/```.*?\n/g, '')
+      .replace(/```$/g, '')
+      .replace(/`([^`]+)`/g, '$1')
+      .replace(/<\/?code>/g, '')
+      .replace(/\*\*/g, '');  // 볼드체 제거
   };
 
   return (
@@ -38,18 +32,8 @@ const ChatContainer: React.FC<ChatContainerProps> = ({ messages }) => {
             </span>
           </div>
           <div className="message-content">
-            <ReactMarkdown>
-              {formatMessage(message.message)}
-            </ReactMarkdown>
+            {formatMessage(message.message)}
           </div>
-          {message.progress !== null && message.progress !== undefined && (
-            <div className="progress-container">
-              <div
-                className="progress-bar"
-                style={{ width: `${(message.progress / 5) * 100}%` }}
-              />
-            </div>
-          )}
         </div>
       ))}
       <div ref={chatEndRef} />
